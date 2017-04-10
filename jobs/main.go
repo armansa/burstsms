@@ -13,6 +13,7 @@ import (
   "io/ioutil"
   "github.com/zpnk/go-bitly/bitly"
   "github.com/mvdan/xurls"
+  "github.com/astaxie/beego/config"
 )
 
 // Make a redis pool
@@ -29,6 +30,9 @@ type Sms struct{
     Number string
     Text string
 }
+
+// read the config file
+var iniconf, _ = config.NewConfig("ini", "../conf/app.conf")
 
 func main() {
   // Make a new pool,
@@ -55,17 +59,17 @@ func (s *Sms) post(number string, text string) string {
     URL := "https://api.transmitsms.com/send-sms.json"
     v := url.Values{"to": {number}, "message": {text}}
     //pass the values to the request's body
-    req, err := http.NewRequest("POST", URL, strings.NewReader(v.Encode()))
+    req, _ := http.NewRequest("POST", URL, strings.NewReader(v.Encode()))
     req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-    req.SetBasicAuth("<api-key>", "<api-sec>")
+    req.SetBasicAuth(iniconf.String("burstsms_api_key"), iniconf.String("burstsms_api_sec"))
     resp, _ := client.Do(req)
-    bodyText, err := ioutil.ReadAll(resp.Body)
+    bodyText, _ := ioutil.ReadAll(resp.Body)
     result := string(bodyText)
     return result
 }
 
 func bitly_url(url string) string{
-  client := bitly.NewClient("<token>")
+  client := bitly.NewClient(iniconf.String("bitly_auth_token"))
   link := &bitly.Link{client}
   short_link, err := link.Lookup(url)
   if err != nil {
@@ -86,7 +90,7 @@ func (s *Sms) SendSms(job *work.Job) error {
   if _, ok := job.Args["Number"]; ok {
     s.Number = job.ArgString("Number")
     s.Text = job.ArgString("Text")
-    s.find_and_short_urls()
+    //s.find_and_short_urls()
     result := s.post(s.Number, s.Text)
     fmt.Println(result)
   } else {

@@ -9,7 +9,10 @@ import (
 
 func init() {
   orm.RegisterDriver("mysql", orm.DRMySQL)
-  orm.RegisterDataBase("default", "mysql", "root:root@/burstsms?charset=utf8", 30)
+	db_name := beego.AppConfig.String("mysql_database")
+	user := beego.AppConfig.String("mysql_user")
+	pass := beego.AppConfig.String("mysql_pass")
+  orm.RegisterDataBase("default", "mysql", user + ":" + pass + "@/" + db_name + "?charset=utf8", 30)
 }
 
 func main() {
