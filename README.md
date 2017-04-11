@@ -14,7 +14,6 @@ go get github.com/go-sql-driver/mysql
 go get -d github.com/zpnk/go-bitly/...
 go get github.com/mvdan/xurls
 
-unfortunately all configurations are hard coded!
 please setup api-key, api-sec, bitly auth-token and mysql user/pass in config/app.conf
 
 to create mysql table run this command in burstsms directory
